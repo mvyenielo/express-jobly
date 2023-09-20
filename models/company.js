@@ -55,9 +55,8 @@ class Company {
    * Returns [{ handle, name, description, numEmployees, logoUrl }, ...]
    * */
 
-  static async findAll(filterParams) {
+  static async findAll(filterParams = {}) {
     const { whereClause, values } = sqlForWhereClause(filterParams);
-
 
     const sqlQuery = `
       SELECT handle,

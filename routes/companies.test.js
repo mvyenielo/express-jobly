@@ -95,6 +95,51 @@ describe("GET /companies", function () {
           ],
     });
   });
+
+  test("ok for one query param", async function () {
+    const resp = await request(app).get("/companies?nameLike=C1");
+
+    expect(resp.body).toEqual({
+      companies:
+          [
+            {
+              handle: "c1",
+              name: "C1",
+              description: "Desc1",
+              numEmployees: 1,
+              logoUrl: "http://c1.img",
+            }
+          ],
+    });
+  });
+
+  test("ok for multiple query params", async function () {
+    const resp = await request(app).get("/companies?nameLike=C&minEmployees=1&maxEmployees=2");
+
+    expect(resp.body).toEqual({
+      companies:
+          [
+            {
+              handle: "c1",
+              name: "C1",
+              description: "Desc1",
+              numEmployees: 1,
+              logoUrl: "http://c1.img",
+            },
+            {
+              handle: "c2",
+              name: "C2",
+              description: "Desc2",
+              numEmployees: 2,
+              logoUrl: "http://c2.img",
+            },
+          ],
+    });
+  });
+
+
+
+
 });
 
 /************************************** GET /companies/:handle */

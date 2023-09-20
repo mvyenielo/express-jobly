@@ -85,6 +85,65 @@ describe("findAll", function () {
       },
     ]);
   });
+
+  test("works: filtering on one param", async function () {
+    const filterParams = { nameLike: "C1"};
+    const companies = await Company.findAll(filterParams);
+
+    expect(companies).toEqual([
+      {
+        handle: "c1",
+        name: "C1",
+        description: "Desc1",
+        numEmployees: 1,
+        logoUrl: "http://c1.img",
+      }
+    ]);
+  });
+
+  test("works: filtering on multiple param", async function () {
+    const filterParams = { nameLike: "C", minEmployees: 1, maxEmployees: 2};
+    const companies = await Company.findAll(filterParams);
+
+    expect(companies).toEqual([
+      {
+        handle: "c1",
+        name: "C1",
+        description: "Desc1",
+        numEmployees: 1,
+        logoUrl: "http://c1.img",
+      },
+      {
+        handle: "c2",
+        name: "C2",
+        description: "Desc2",
+        numEmployees: 2,
+        logoUrl: "http://c2.img",
+      }
+    ]);
+  });
+
+  test("works: case-insensitive when filtering name", async function () {
+    const filterParams = { nameLike: "c1"};
+    const companies = await Company.findAll(filterParams);
+
+    expect(companies).toEqual([
+      {
+        handle: "c1",
+        name: "C1",
+        description: "Desc1",
+        numEmployees: 1,
+        logoUrl: "http://c1.img",
+      }
+    ]);
+  });
+
+  test("works: returns empty array when no results found", async function () {
+    const filterParams = { nameLike: "scooby doo"};
+    const companies = await Company.findAll(filterParams);
+
+    expect(companies).toEqual([]);
+  });
 });
 
 /************************************** get */
