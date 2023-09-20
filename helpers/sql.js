@@ -8,15 +8,13 @@ const { BadRequestError } = require("../expressError");
  * corresponding columns to update and an array of the values to update with.
  * Also formats columns from camelCase to snake_case.
  *
- * dataToUpdate :
- * {
-  "numEmployees": 796,
-   ....
-  }
+ * dataToUpdate : {
+ *   "numEmployees": 796,
+ * }
  * jsToSql: {
-...           numEmployees: "num_employees",
-...           logoUrl: "logo_url",
-...         }
+ *   numEmployees: "num_employees",
+ *   logoUrl: "logo_url",
+ * }
  *
  *
  * returns: { setCols: '"num_employees"=$1', values: [ 796 ] }
@@ -39,6 +37,23 @@ function sqlForPartialUpdate(dataToUpdate, jsToSql) {
     values: Object.values(dataToUpdate),
   };
 }
+
+/**
+ * sqlForWhereClause: Takes in an object with key/value pairs that are search
+ * parameters and values. Returns an object containing a string formatted to
+ * be placed in a WHERE clause, as well an array of corresponding values
+ *
+ *
+ * filterParams: { nameLike: "bob", minEmployees: 5 }
+ *
+ * returns: {
+ *   whereClause: "name ILIKE $1 AND num_employees >= $2",
+ *   values: ["%bob%", 5]
+ * }
+ *
+ * @param {object} filterParams
+ * @returns object
+ */
 
 function sqlForWhereClause(filterParams) {
   const keys = Object.keys(filterParams);

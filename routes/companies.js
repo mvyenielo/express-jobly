@@ -52,12 +52,13 @@ router.post("/", ensureLoggedIn, async function (req, res, next) {
  */
 
 router.get("/", async function (req, res, next) {
-  if (Object.keys(req.query).length === 0) {
+
+  const request = req.query;
+
+  if (Object.keys(request).length === 0) {
     const companies = await Company.findAll();
     return res.json({ companies });
   }
-
-  const request = { ...req.query };
 
   if (request.minEmployees) {
     request.minEmployees = Number(request.minEmployees);
@@ -65,12 +66,6 @@ router.get("/", async function (req, res, next) {
 
   if (request.maxEmployees) {
     request.maxEmployees = Number(request.maxEmployees);
-  }
-
-  if (request.nameLike) {
-    if (Number(request.nameLike)) {
-      request.nameLike = Number(request.nameLike);
-    }
   }
 
   const validator = jsonschema.validate(

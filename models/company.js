@@ -56,7 +56,18 @@ class Company {
    * */
 
   static async findAll(filterParams = {}) {
-    const { whereClause, values } = sqlForWhereClause(filterParams);
+    let where;
+    let valuesList;
+
+    if (Object.keys(filterParams).length === 0) {
+      where = "";
+      valuesList = [];
+    } else {
+      const { whereClause, values } = sqlForWhereClause(filterParams);
+      where = "WHERE " + whereClause;
+      valuesList = values;
+    }
+    console.log("WHERE = ", where);
 
     const sqlQuery = `
       SELECT handle,
@@ -65,11 +76,11 @@ class Company {
             num_employees AS "numEmployees",
             logo_url      AS "logoUrl"
       FROM companies
-      ${whereClause.length === 0 ? "" : "WHERE " + whereClause}
+      ${where}
       ORDER BY name`;
 
     const companiesRes = await db.query(sqlQuery,
-      values);
+      valuesList);
 
     return companiesRes.rows;
   }
