@@ -10,7 +10,7 @@ const { BadRequestError } = require("../expressError");
  *
  * dataToUpdate :
  * {
-	"numEmployees": 796,
+  "numEmployees": 796,
    ....
   }
  * jsToSql: {
@@ -31,7 +31,7 @@ function sqlForPartialUpdate(dataToUpdate, jsToSql) {
 
   // {firstName: 'Aliya', age: 32} => ['"first_name"=$1', '"age"=$2']
   const cols = keys.map((colName, idx) =>
-      `"${jsToSql[colName] || colName}"=$${idx + 1}`,
+    `"${jsToSql[colName] || colName}"=$${idx + 1}`,
   );
 
   return {
@@ -40,4 +40,28 @@ function sqlForPartialUpdate(dataToUpdate, jsToSql) {
   };
 }
 
-module.exports = { sqlForPartialUpdate };
+function sqlForWhereClause(filterParams) {
+  const keys = Object.keys(filterParams);
+
+  const whereClause = keys.map((filterParam, idx) => {
+    if (filterParam === "nameLike") {
+      return (`name ILIKE $${idx}`);
+    }
+    if (filterParam === "minEmployees") {
+      return (`num_employees >= $${idx}`);
+    }
+    if (filterParam === "maxEmployees") {
+      return (`num_employees <= $${idx}`);
+    }
+  });
+
+
+  return {
+    setCols: whereClause.join(", "),
+    values: Object.values(filterParams),
+  };
+
+
+}
+
+module.exports = { sqlForPartialUpdate, sqlForWhereClause };
