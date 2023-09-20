@@ -38,12 +38,12 @@ class Company {
                     description,
                     num_employees AS "numEmployees",
                     logo_url AS "logoUrl"`, [
-          handle,
-          name,
-          description,
-          numEmployees,
-          logoUrl,
-        ],
+      handle,
+      name,
+      description,
+      numEmployees,
+      logoUrl,
+    ],
     );
     const company = result.rows[0];
 
@@ -58,6 +58,7 @@ class Company {
   static async findAll(filterParams) {
     const { whereClause, values } = sqlForWhereClause(filterParams);
 
+
     const sqlQuery = `
       SELECT handle,
             name,
@@ -65,11 +66,11 @@ class Company {
             num_employees AS "numEmployees",
             logo_url      AS "logoUrl"
       FROM companies
-      WHERE ${whereClause}
+      ${whereClause.length === 0 ? "" : "WHERE " + whereClause}
       ORDER BY name`;
 
     const companiesRes = await db.query(sqlQuery,
-        values);
+      values);
 
     return companiesRes.rows;
   }
@@ -113,11 +114,11 @@ class Company {
 
   static async update(handle, data) {
     const { setCols, values } = sqlForPartialUpdate(
-        data,
-        {
-          numEmployees: "num_employees",
-          logoUrl: "logo_url",
-        });
+      data,
+      {
+        numEmployees: "num_employees",
+        logoUrl: "logo_url",
+      });
     const handleVarIdx = "$" + (values.length + 1);
 
     const querySql = `
