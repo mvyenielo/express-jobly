@@ -45,23 +45,21 @@ function sqlForWhereClause(filterParams) {
 
   const whereClause = keys.map((filterParam, idx) => {
     if (filterParam === "nameLike") {
-      return (`name ILIKE $${idx}`);
+      filterParams[filterParam] = `%${filterParams[filterParam]}%`;
+      return (`name ILIKE $${idx + 1}`);
     }
     if (filterParam === "minEmployees") {
-      return (`num_employees >= $${idx}`);
+      return (`num_employees >= $${idx + 1}`);
     }
     if (filterParam === "maxEmployees") {
-      return (`num_employees <= $${idx}`);
+      return (`num_employees <= $${idx + 1}`);
     }
   });
 
-
   return {
-    setCols: whereClause.join(", "),
+    whereClause: whereClause.join(" AND "),
     values: Object.values(filterParams),
   };
-
-
 }
 
 module.exports = { sqlForPartialUpdate, sqlForWhereClause };
