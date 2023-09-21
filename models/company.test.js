@@ -155,7 +155,7 @@ describe("findAll", function () {
 });
 
 
-/************************************** sqlFromWhereClause */
+/************************************** sqlForWhereClause */
 
 describe("sqlForWhereClause", function () {
   it(`Returns correct WHERE clause and value array`,
