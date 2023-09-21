@@ -31,7 +31,7 @@ describe("create", function () {
     expect(company).toEqual(newCompany);
 
     const result = await db.query(
-          `SELECT handle, name, description, num_employees, logo_url
+      `SELECT handle, name, description, num_employees, logo_url
            FROM companies
            WHERE handle = 'new'`);
     expect(result.rows).toEqual([
@@ -87,7 +87,7 @@ describe("findAll", function () {
   });
 
   test("works: filtering on one param", async function () {
-    const filterParams = { nameLike: "C1"};
+    const filterParams = { nameLike: "C1" };
     const companies = await Company.findAll(filterParams);
 
     expect(companies).toEqual([
@@ -102,7 +102,7 @@ describe("findAll", function () {
   });
 
   test("works: filtering on multiple param", async function () {
-    const filterParams = { nameLike: "C", minEmployees: 1, maxEmployees: 2};
+    const filterParams = { nameLike: "C", minEmployees: 1, maxEmployees: 2 };
     const companies = await Company.findAll(filterParams);
 
     expect(companies).toEqual([
@@ -124,7 +124,7 @@ describe("findAll", function () {
   });
 
   test("works: case-insensitive when filtering name", async function () {
-    const filterParams = { nameLike: "c1"};
+    const filterParams = { nameLike: "c1" };
     const companies = await Company.findAll(filterParams);
 
     expect(companies).toEqual([
@@ -139,18 +139,19 @@ describe("findAll", function () {
   });
 
   test("works: returns empty array when no results found", async function () {
-    const filterParams = { nameLike: "scooby doo"};
+    const filterParams = { nameLike: "scooby doo" };
     const companies = await Company.findAll(filterParams);
 
     expect(companies).toEqual([]);
   });
 
   test("throws bad request error when min is greater than max",
-        async function () {
-          const filterParams = { minEmployees: 2, maxEmployees: 1};
+    async function () {
+      const filterParams = { minEmployees: 2, maxEmployees: 1 };
 
-          expect(async () => await Company.findAll(filterParams)).toThrow(BadRequestError);
-  });
+      await expect(async () =>
+        await Company.findAll(filterParams)).rejects.toThrow(BadRequestError);
+    });
 });
 
 
@@ -225,7 +226,7 @@ describe("update", function () {
     });
 
     const result = await db.query(
-          `SELECT handle, name, description, num_employees, logo_url
+      `SELECT handle, name, description, num_employees, logo_url
            FROM companies
            WHERE handle = 'c1'`);
     expect(result.rows).toEqual([{
@@ -252,7 +253,7 @@ describe("update", function () {
     });
 
     const result = await db.query(
-          `SELECT handle, name, description, num_employees, logo_url
+      `SELECT handle, name, description, num_employees, logo_url
            FROM companies
            WHERE handle = 'c1'`);
     expect(result.rows).toEqual([{
@@ -289,7 +290,7 @@ describe("remove", function () {
   test("works", async function () {
     await Company.remove("c1");
     const res = await db.query(
-        "SELECT handle FROM companies WHERE handle='c1'");
+      "SELECT handle FROM companies WHERE handle='c1'");
     expect(res.rows.length).toEqual(0);
   });
 
