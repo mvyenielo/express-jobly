@@ -161,17 +161,16 @@ describe("GET /companies", function () {
       });
     });
 
-  test(`throws BadRequestError if minEmployees search param greater than
-    maxEmployeers search param`,
+  test(`throws BadRequestError if param violates JSON schema`,
     async function () {
       const resp = await request(app).get(
-        `/companies?nameLike=55`
+        `/companies?minEmployees=dog`
       );
 
       expect(resp.body).toEqual({
         "error": {
           "message": [
-            "instance.nameLike is not of a type(s) string"
+            "instance.minEmployees is not of a type(s) integer"
           ],
           "status": 400
         }
