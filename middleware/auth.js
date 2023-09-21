@@ -45,9 +45,9 @@ function ensureLoggedIn(req, res, next) {
  * If not, raises Unauthorized.
  */
 
-//TODO: can refactor this to also check if they are logged in
+
 function ensureIsAdmin(req, res, next) {
-  if (res.locals.user?.isAdmin) return next();
+  if (res.locals.user?.isAdmin && res.locals.user?.username) return next();
   throw new UnauthorizedError();
 }
 
@@ -57,10 +57,9 @@ function ensureIsAdmin(req, res, next) {
 * If not, raises Unauthorized.
 */
 
-//TODO: can refactor this to also check if they are logged in
-//FIXME: could rename a bit more descriptively that it is correct user
-function ensureIsAdminOrUser(req, res, next) {
-  if (res.locals.user?.isAdmin ||
+
+function ensureIsAdminOrSpecifiedUser(req, res, next) {
+  if ((res.locals.user?.isAdmin && res.locals.user?.username) ||
     res.locals.user?.username === req.params?.username) return next();
   throw new UnauthorizedError();
 }
@@ -71,5 +70,5 @@ module.exports = {
   authenticateJWT,
   ensureLoggedIn,
   ensureIsAdmin,
-  ensureIsAdminOrUser
+  ensureIsAdminOrSpecifiedUser
 };

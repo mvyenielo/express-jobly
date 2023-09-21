@@ -55,6 +55,16 @@ describe("POST /companies", function () {
     });
   });
 
+  test("unauth for anon user", async function () {
+    const resp = await request(app)
+      .post("/companies")
+      .send({
+        handle: "new",
+        numEmployees: 10,
+      });
+    expect(resp.statusCode).toEqual(401);
+  });
+
   test("bad request with missing data", async function () {
     const resp = await request(app)
       .post("/companies")
