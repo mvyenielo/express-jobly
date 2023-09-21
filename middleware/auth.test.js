@@ -69,55 +69,54 @@ describe("ensureLoggedIn", function () {
     expect(() => ensureLoggedIn(req, res, next))
       .toThrow(UnauthorizedError);
   });
+});
 
 
-  describe("ensureIsAdmin", function () {
-    test("works for admins", function () {
-      const req = {};
-      const res = { locals: { user: { username: "test", isAdmin: true } } };
-      ensureIsAdmin(req, res, next);
-    });
-
-    test("works for non-admins", function () {
-      const req = {};
-      const res = { locals: { user: { username: "test", isAdmin: false } } };
-      expect(() => ensureIsAdmin(req, res, next)).toThrow(UnauthorizedError);
-    });
-
-    test("works for anon", function () {
-      const req = {};
-      const res = { locals: {} };
-      expect(() => ensureIsAdmin(req, res, next)).toThrow(UnauthorizedError);
-    });
+describe("ensureIsAdmin", function () {
+  test("works for admins", function () {
+    const req = {};
+    const res = { locals: { user: { username: "test", isAdmin: true } } };
+    ensureIsAdmin(req, res, next);
   });
 
-  describe("ensureIsAdminOrUser", function () {
-    test("works for admins", function () {
-      const req = { params: { username: "test" } };
-      const res = { locals: { user: { username: "testAdmin", isAdmin: true } } };
-      ensureIsAdminOrUser(req, res, next);
-    });
-
-    test("works for user specified in params", function () {
-      const req = { params: { username: "test" } };
-      const res = { locals: { user: { username: "test", isAdmin: false } } };
-      ensureIsAdminOrUser(req, res, next);
-    });
-
-    test("works for user not specified in params", function () {
-      const req = { params: { username: "test" } };
-      const res = { locals: { user: { username: "test2", isAdmin: false } } };
-      expect(() =>
-        ensureIsAdminOrUser(req, res, next)).toThrow(UnauthorizedError);
-    });
-
-    test("works for anon", function () {
-      const req = { params: { username: "test" } };
-      const res = { locals: {} };
-      expect(() =>
-        ensureIsAdminOrUser(req, res, next)).toThrow(UnauthorizedError);
-    });
+  test("works for non-admins", function () {
+    const req = {};
+    const res = { locals: { user: { username: "test", isAdmin: false } } };
+    expect(() => ensureIsAdmin(req, res, next)).toThrow(UnauthorizedError);
   });
 
+  test("works for anon", function () {
+    const req = {};
+    const res = { locals: {} };
+    expect(() => ensureIsAdmin(req, res, next)).toThrow(UnauthorizedError);
+  });
+});
 
+
+describe("ensureIsAdminOrUser", function () {
+  test("works for admins", function () {
+    const req = { params: { username: "test" } };
+    const res = { locals: { user: { username: "testAdmin", isAdmin: true } } };
+    ensureIsAdminOrUser(req, res, next);
+  });
+
+  test("works for user specified in params", function () {
+    const req = { params: { username: "test" } };
+    const res = { locals: { user: { username: "test", isAdmin: false } } };
+    ensureIsAdminOrUser(req, res, next);
+  });
+
+  test("works for user not specified in params", function () {
+    const req = { params: { username: "test" } };
+    const res = { locals: { user: { username: "test2", isAdmin: false } } };
+    expect(() =>
+      ensureIsAdminOrUser(req, res, next)).toThrow(UnauthorizedError);
+  });
+
+  test("works for anon", function () {
+    const req = { params: { username: "test" } };
+    const res = { locals: {} };
+    expect(() =>
+      ensureIsAdminOrUser(req, res, next)).toThrow(UnauthorizedError);
+  });
 });
