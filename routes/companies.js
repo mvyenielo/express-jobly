@@ -52,24 +52,18 @@ router.post("/", ensureLoggedIn, async function (req, res, next) {
  */
 
 router.get("/", async function (req, res, next) {
+  const query = req.query;
 
-  const request = req.query;
-
-  if (Object.keys(request).length === 0) {
-    const companies = await Company.findAll();
-    return res.json({ companies });
+  if (query.minEmployees) {
+    query.minEmployees = Number(query.minEmployees);
   }
 
-  if (request.minEmployees) {
-    request.minEmployees = Number(request.minEmployees);
-  }
-
-  if (request.maxEmployees) {
-    request.maxEmployees = Number(request.maxEmployees);
+  if (query.maxEmployees) {
+    query.maxEmployees = Number(query.maxEmployees);
   }
 
   const validator = jsonschema.validate(
-    request, companySearchSchema, { required: true }
+    query, companySearchSchema, { required: true }
   );
 
   if (!validator.valid) {
@@ -77,11 +71,7 @@ router.get("/", async function (req, res, next) {
     throw new BadRequestError(errs);
   }
 
-  if (request.minEmployees > request.maxEmployees) {
-    throw new BadRequestError(`minEmployees cannot be greater than maxEmployees`);
-  }
-
-  const companies = await Company.findAll(request);
+  const companies = await Company.findAll(query);
   return res.json({ companies });
 });
 

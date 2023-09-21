@@ -1,8 +1,7 @@
 "use strict";
 
 const { BadRequestError } = require('../expressError');
-// const request = require("supertest");
-const { sqlForPartialUpdate, sqlForWhereClause } = require('./sql');
+const { sqlForPartialUpdate } = require('./sql');
 
 describe("sqlForPartialUpdate", function () {
   it(`Returns the correct column string and value
@@ -43,32 +42,5 @@ describe("sqlForPartialUpdate", function () {
 
       expect(result.setCols).toContain("num_employees");
 
-    });
-});
-
-describe("sqlForWhereClause", function () {
-  it(`Returns correct WHERE clause and value array`,
-    function () {
-      const filterParams = { nameLike: "bob", minEmployees: 5 };
-
-      const result = sqlForWhereClause(filterParams);
-
-      expect(result).toEqual({
-        whereClause: "name ILIKE $1 AND num_employees >= $2",
-        values: ["%bob%", 5]
-      });
-    });
-
-  it(`Returns object with whereClause key set to empty string and values key set
-  to empty array `,
-    function () {
-      const filterParams = {};
-
-      const result = sqlForWhereClause(filterParams);
-
-      expect(result).toEqual({
-        whereClause: "",
-        values: []
-      });
     });
 });

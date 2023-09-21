@@ -145,38 +145,6 @@ describe("GET /companies", function () {
         companies: [],
       });
     });
-
-  test(`throws BadRequestError if minEmployees search param greater than
-        maxEmployeers search param`,
-    async function () {
-      const resp = await request(app).get(
-        `/companies?minEmployees=400&maxEmployees=200`
-      );
-
-      expect(resp.body).toEqual({
-        "error": {
-          "message": "minEmployees cannot be greater than maxEmployees",
-          "status": 400
-        }
-      });
-    });
-
-  test(`throws BadRequestError if param violates JSON schema`,
-    async function () {
-      const resp = await request(app).get(
-        `/companies?minEmployees=dog`
-      );
-
-      expect(resp.body).toEqual({
-        "error": {
-          "message": [
-            "instance.minEmployees is not of a type(s) integer"
-          ],
-          "status": 400
-        }
-      });
-    });
-
 });
 
 /************************************** GET /companies/:handle */

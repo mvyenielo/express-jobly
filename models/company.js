@@ -56,18 +56,13 @@ class Company {
    * */
 
   static async findAll(filterParams = {}) {
-    let where;
-    let valuesList;
-
-    if (Object.keys(filterParams).length === 0) {
-      where = "";
-      valuesList = [];
-    } else {
-      const { whereClause, values } = sqlForWhereClause(filterParams);
-      where = "WHERE " + whereClause;
-      valuesList = values;
+    if (filterParams.minEmployees && filterParams.maxEmployees) {
+      if (filterParams.minEmployees > filterParams.maxEmployees) {
+        throw new BadRequestError(`minEmployees cannot be greater than maxEmployees`);
+      }
     }
-    console.log("WHERE = ", where);
+
+    const { whereClause, values } = Company.sqlForWhereClause(filterParams);
 
     const sqlQuery = `
       SELECT handle,
@@ -76,14 +71,53 @@ class Company {
             num_employees AS "numEmployees",
             logo_url      AS "logoUrl"
       FROM companies
-      ${where}
+      ${whereClause}
       ORDER BY name`;
 
     const companiesRes = await db.query(sqlQuery,
-      valuesList);
+      values);
 
     return companiesRes.rows;
   }
+
+  /**
+ * sqlForWhereClause: Takes in an object with key/value pairs that are search
+ * parameters and values. Returns an object containing a string formatted to
+ * be placed in a WHERE clause, as well an array of corresponding values
+ *
+ *
+ * filterParams: { nameLike: "bob", minEmployees: 5 }
+ *
+ * returns: {
+ *   whereClause: "name ILIKE $1 AND num_employees >= $2",
+ *   values: ["%bob%", 5]
+ * }
+ *
+ * @param {object} filterParams
+ * @returns object
+ */
+
+static sqlForWhereClause(filterParams) {
+  const keys = Object.keys(filterParams);
+
+  let whereClause = keys.map((filterParam, idx) => {
+    if (filterParam === "nameLike") {
+      filterParams[filterParam] = `%${filterParams[filterParam]}%`;
+      return (`name ILIKE $${idx + 1}`);
+    }
+    if (filterParam === "minEmployees") {
+      return (`num_employees >= $${idx + 1}`);
+    }
+    if (filterParam === "maxEmployees") {
+      return (`num_employees <= $${idx + 1}`);
+    }
+  });
+
+  return {
+    whereClause: whereClause.length !== 0 ? "WHERE " + whereClause.join(" AND ") : "",
+    values: Object.values(filterParams),
+  };
+}
 
   /** Given a company handle, return data about company.
    *

@@ -144,6 +144,43 @@ describe("findAll", function () {
 
     expect(companies).toEqual([]);
   });
+
+  test("throws bad request error when min is greater than max",
+        async function () {
+          const filterParams = { minEmployees: 2, maxEmployees: 1};
+
+          expect(async () => await Company.findAll(filterParams)).toThrow(BadRequestError);
+  });
+});
+
+
+/************************************** sqlFromWhereClause */
+
+describe("sqlForWhereClause", function () {
+  it(`Returns correct WHERE clause and value array`,
+    function () {
+      const filterParams = { nameLike: "bob", minEmployees: 5 };
+
+      const result = Company.sqlForWhereClause(filterParams);
+
+      expect(result).toEqual({
+        whereClause: "WHERE name ILIKE $1 AND num_employees >= $2",
+        values: ["%bob%", 5]
+      });
+    });
+
+  it(`Returns object with whereClause key set to empty string and values key set
+  to empty array `,
+    function () {
+      const filterParams = {};
+
+      const result = Company.sqlForWhereClause(filterParams);
+
+      expect(result).toEqual({
+        whereClause: "",
+        values: []
+      });
+    });
 });
 
 /************************************** get */
