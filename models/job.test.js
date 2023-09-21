@@ -28,26 +28,26 @@ describe("create", function () {
     const job = await Job.create(jobData);
 
     expect(job).toEqual({
-      id: 3,
+      id: expect.any(Number),
       title: 'newJob',
       salary: 50000,
       equity: 0.005,
-      company_handle: 'c1'
+      companyHandle: 'c1'
     });
 
     const result = await db.query(
       `SELECT id, title, salary, equity, company_handle
         FROM jobs
-        WHERE title = newJob
+        WHERE title = 'newJob'
       `
     );
 
     expect(result.rows[0]).toEqual({
-      id: 3,
+      id: expect.any(Number),
       title: 'newJob',
       salary: 50000,
       equity: 0.005,
-      company_handle: 'c1'
+      companyHandle: 'c1'
     });
 
   });
@@ -264,5 +264,5 @@ describe("remove", function () {
   test("not found error if no such job", async function () {
     await expect(async () =>
       await Job.remove(1)).rejects.toThrow(NotFoundError);
-  })
+  });
 });
