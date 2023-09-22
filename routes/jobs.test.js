@@ -19,6 +19,8 @@ beforeEach(commonBeforeEach);
 afterEach(commonAfterEach);
 afterAll(commonAfterAll);
 
+/************************************** POST /jobs */
+
 describe("POST /jobs", function () {
   const newJob = {
     title: "newJob",
@@ -30,7 +32,7 @@ describe("POST /jobs", function () {
   test("ok for admins", async function () {
     const resp = await request(app)
       .post("/jobs")
-      .send("newJob")
+      .send(newJob)
       .set("authorization", `Bearer ${adminToken}`);
 
     expect(resp.statusCode).toEqual(201);
@@ -40,5 +42,54 @@ describe("POST /jobs", function () {
         ...newJob
       }
     });
+  });
+
+  test("non-admins cannot add company", async function () {
+    const resp = await request(app)
+      .post("/jobs")
+      .send(newJob)
+      .set("authorization", `Bearer ${u1Token}`);
+
+    expect(resp.statusCode).toEqual(401);
+    expect(resp.body).toEqual({
+      "error": {
+        "message": "Unauthorized",
+        "status": 401
+      }
+    });
+  });
+
+  test("unauth for anon users", async function () {
+    const resp = await request(app)
+      .post("/jobs")
+      .send(newJob);
+
+    expect(resp.statusCode).toEqual(401);
+    expect(resp.body).toEqual({
+      "error": {
+        "message": "Unauthorized",
+        "status": 401
+      }
+    });
+  });
+
+  //TODO: add a test for partial update
+
+  test("bad request with missing data", async function () {
+    const resp = await request(app)
+      .post("/jobs")
+      .send({ title: "newJob" })
+      .set("authorization", `Bearer ${adminToken}`);
+
+    expect(resp.statusCode).toEqual(400);
+  });
+
+  test("bad request with missing data", async function () {
+    const resp = await request(app)
+      .post("/jobs")
+      .send({ ...newJob, salary: 'cat'})
+      .set("authorization", `Bearer ${adminToken}`);
+
+    expect(resp.statusCode).toEqual(400);
   });
 });

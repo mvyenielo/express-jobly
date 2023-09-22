@@ -2,7 +2,7 @@
 
 const db = require("../db");
 const { NotFoundError } = require("../expressError");
-const { sqlForPartialUpdate } = require("../helpers/sql");
+const { sqlForPartialUpdate, sqlForPartialCreate } = require("../helpers/sql");
 
 
 /** Related functions for jobs. */
@@ -16,20 +16,23 @@ class Job {
    *
    * */
 
-  static async create({ title, salary, equity, companyHandle }) {
+  static async create(data) {
+    const { setCols, values } = sqlForPartialCreate(data, {
+      companyHandle: "company_handle"
+    });
+
+    const valIdxs = values.map((param, idx) => `$${idx + 1}`).join(", ");
+
     const result = await db.query(`
-                INSERT INTO jobs (title,
-                                  salary,
-                                  equity,
-                                  company_handle)
-                VALUES ($1, $2, $3, $4)
+                INSERT INTO jobs (${setCols})
+                VALUES (${valIdxs})
                 RETURNING
                     id,
                     title,
                     salary,
                     equity,
                     company_handle AS "companyHandle" `,
-      [title, salary, equity, companyHandle]
+      values
     );
     const job = result.rows[0];
 
