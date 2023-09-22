@@ -73,7 +73,24 @@ describe("POST /jobs", function () {
     });
   });
 
-  //TODO: add a test for partial update
+
+  test("works with only required data (no equity or salary)", async function () {
+    const resp = await request(app)
+      .post("/jobs")
+      .send({ title: "newJob2", companyHandle: "c1" })
+      .set("authorization", `Bearer ${adminToken}`);
+
+    expect(resp.statusCode).toEqual(201);
+    expect(resp.body).toEqual({
+      job: {
+        id: expect.any(Number),
+        title: "newJob2",
+        salary: null,
+        equity: null,
+        companyHandle: "c1"
+      }
+    });
+  });
 
   test("bad request with missing data", async function () {
     const resp = await request(app)
@@ -87,7 +104,7 @@ describe("POST /jobs", function () {
   test("bad request with missing data", async function () {
     const resp = await request(app)
       .post("/jobs")
-      .send({ ...newJob, salary: 'cat'})
+      .send({ ...newJob, salary: 'cat' })
       .set("authorization", `Bearer ${adminToken}`);
 
     expect(resp.statusCode).toEqual(400);
