@@ -53,7 +53,7 @@ router.post('/', ensureIsAdmin, async function (req, res, next) {
  * returns a list of all jobs
  */
 router.get('/', async function (req, res, next) {
-  const jobs = await Company.findAll();
+  const jobs = await Job.findAll();
   return res.json({ jobs });
 });
 
