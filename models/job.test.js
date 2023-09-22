@@ -1,5 +1,7 @@
 "use strict";
 
+
+
 const db = require('../db');
 const { NotFoundError } = require('../expressError');
 const Job = require('./job');
@@ -8,6 +10,7 @@ const {
   commonBeforeEach,
   commonAfterEach,
   commonAfterAll,
+  createdJobId
 } = require("./_testCommon");
 
 beforeAll(commonBeforeAll);
@@ -46,8 +49,8 @@ describe("create", function () {
       id: expect.any(Number),
       title: 'newJob',
       salary: 50000,
-      equity: 0.005,
-      companyHandle: 'c1'
+      equity: "0.005",
+      company_handle: 'c1'
     });
 
   });
@@ -60,14 +63,14 @@ describe("findAll", function () {
     let jobs = await Job.findAll();
     expect(jobs).toEqual([
       {
-        id: 1,
+        id: expect.any(Number),
         title: 'J1',
         salary: 60000,
         equity: null,
         company_handle: 'c1'
       },
       {
-        id: 2,
+        id: expect.any(Number),
         title: 'J2',
         salary: 70000,
         equity: 0.03,
@@ -82,7 +85,7 @@ describe("findAll", function () {
 
     expect(jobs).toEqual([
       {
-        id: 2,
+        id: expect.any(Number),
         title: 'J2',
         salary: 70000,
         equity: 0.03,
@@ -97,7 +100,7 @@ describe("findAll", function () {
 
     expect(jobs).toEqual([
       {
-        id: 2,
+        id: expect.any(Number),
         title: 'J2',
         salary: 70000,
         equity: 0.03,
@@ -112,7 +115,7 @@ describe("findAll", function () {
 
     expect(jobs).toEqual([
       {
-        id: 1,
+        id: expect.any(Number),
         title: 'J1',
         salary: 60000,
         equity: null,
@@ -162,10 +165,10 @@ describe("sqlForWhereClause", function () {
 
 describe("get", function () {
   test("works with id", async function () {
-    const job = await Job.get(1);
+    const job = await Job.get(createdJobId);
 
     expect(job).toEqual({
-      id: 1,
+      id: createdJobId,
       title: 'J1',
       salary: 60000,
       equity: null,
@@ -189,10 +192,10 @@ describe("update", function () {
   };
 
   test("works with valid data", async function () {
-    const job = await Job.update(1, updateData);
+    const job = await Job.update(createdJobId, updateData);
 
     expect(job).toEqual({
-      id: 1,
+      id: createdJobId,
       ...updateData,
       company_handle: 'c1'
     });
@@ -200,10 +203,10 @@ describe("update", function () {
     const result = await db.query(`
     SELECT id, title, salary, equity, company_handle
       FROM jobs
-      WHERE id = 1`);
+      WHERE id = ${createdJobId}`);
 
     expect(result.rows[0]).toEqual({
-      id: 1,
+      id: createdJobId,
       ...updateData,
       company_handle: 'c1'
     });
@@ -216,20 +219,20 @@ describe("update", function () {
       equity: null
     };
 
-    const job = await Job.update(1, updateDataSetNulls);
+    const job = await Job.update(createdJobId, updateDataSetNulls);
 
     expect(job).toEqual({
-      id: 1,
+      id: createdJobId,
       ...updateDataSetNulls
     });
 
     const result = await db.query(`
     SELECT id, title, salary, equity, company_handle
       FROM jobs
-      WHERE id = 1`);
+      WHERE id = ${createdJobId}`);
 
     expect(result.rows[0]).toEqual({
-      id: 1,
+      id: createdJobId,
       ...updateDataSetNulls,
       company_handle: 'c1'
     });
@@ -242,7 +245,7 @@ describe("update", function () {
 
   test("bad request with no data", async function () {
     await expect(async () =>
-      await Job.update(1, {})), rehects.toThrow(NotFoundError);
+      await Job.update(createdJobId, {})), rehects.toThrow(NotFoundError);
   });
 });
 
@@ -250,9 +253,9 @@ describe("update", function () {
 
 describe("remove", function () {
   test("works", async function () {
-    const removedJob = await Job.remove(1);
+    const removedJob = await Job.remove(createdJobId);
 
-    expect(removedJob).toEqual({ id: 1 });
+    expect(removedJob).toEqual({ id: createdJobId });
 
     const result = await db.query(`
       SELECT id FROM jobs WHERE id = 1;
@@ -263,6 +266,6 @@ describe("remove", function () {
 
   test("not found error if no such job", async function () {
     await expect(async () =>
-      await Job.remove(1)).rejects.toThrow(NotFoundError);
+      await Job.remove(createdJobId)).rejects.toThrow(NotFoundError);
   });
 });

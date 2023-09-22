@@ -38,6 +38,28 @@ class Job {
     return job;
   }
 
+  static async findAll(filterParams = {}) {
+    const { whereClause, values } = Job.sqlForWhereClause(filterParams);
+
+    const sqlQuery = `
+    SELECT id,
+    title,
+    salary,
+    equity,
+    company_handle AS "companyHandle"
+    FROM jobs
+    ${whereClause}
+    ORDER BY title`;
+
+    const jobRes = await db.query(sqlQuery,
+      values);
+
+    for (const job in jobRes.rows) {
+      job.equity = Number(job.equity);
+    }
+
+    return jobRes.rows;
+  }
 }
 
 module.exports = Job;
