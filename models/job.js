@@ -54,12 +54,54 @@ class Job {
     const jobRes = await db.query(sqlQuery,
       values);
 
-    for (const job in jobRes.rows) {
+    for (const job of jobRes.rows) {
       job.equity = Number(job.equity);
     }
 
     return jobRes.rows;
   }
+
+  /**
+ * sqlForWhereClause: Takes in an object with key/value pairs that are search
+ * parameters and values. Returns an object containing a string formatted to
+ * be placed in a WHERE clause, as well an array of corresponding values
+ *
+ *
+ * filterParams: { title: "bob", hasEquity: tru }
+ *
+ * returns: {
+ *   whereClause: "title ILIKE $1 AND equity > 0",
+ *   values: ["%bob%"]
+ * }
+ *
+ * @param {object} filterParams
+ * @returns object
+ */
+
+  static sqlForWhereClause(filterParams) {
+    const keys = Object.keys(filterParams);
+
+    let whereClause = keys.map((filterParam, idx) => {
+      if (filterParam === "title") {
+        filterParams[filterParam] = `%${filterParams[filterParam]}%`;
+        return (`title ILIKE $${idx + 1}`);
+      }
+      if (filterParam === "minSalary") {
+        return (`salary >= $${idx + 1}`);
+      }
+      if (filterParam === "hasEquity" && filterParams?.hasEquity === true) {
+        return (`equity > 0`);
+      }
+    });
+
+    return {
+      whereClause: whereClause.length !== 0 ? "WHERE " +
+        whereClause.join(" AND ") : "",
+      values: Object.values(filterParams).filter(value =>
+        typeof value !== "boolean"),
+    };
+  }
+
 }
 
 module.exports = Job;

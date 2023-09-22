@@ -5,7 +5,7 @@ const bcrypt = require("bcrypt");
 const db = require("../db.js");
 const { BCRYPT_WORK_FACTOR } = require("../config");
 
-let createdJobId;
+let createdJobId = [];
 
 async function commonBeforeAll() {
   await db.query("DELETE FROM jobs");
@@ -49,9 +49,11 @@ async function commonBeforeAll() {
                   equity,
                   company_handle AS "companyHandle"
         `);
-
-  createdJobId = createdJob.id;
+  console.log("CREATED JOB ROWS, ", createdJob.rows[0].id);
+  createdJobId.push(createdJob.rows[0].id);
+  console.log(createdJobId);
 }
+console.log(createdJobId);
 
 async function commonBeforeEach() {
   await db.query("BEGIN");
