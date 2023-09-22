@@ -46,6 +46,15 @@ router.post('/', ensureIsAdmin, async function (req, res, next) {
 
   const job = await Job.create(bodyData);
   return res.status(201).json({ job });
-})
+});
+
+/** GET /
+ *
+ * returns a list of all jobs
+ */
+router.get('/', async function (req, res, next) {
+  const jobs = await Company.findAll();
+  return res.json({ jobs });
+});
 
 module.exports = router;
