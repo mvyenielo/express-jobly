@@ -1,7 +1,7 @@
 "use strict";
 
 const db = require("../db");
-const { BadRequestError, NotFoundError } = require("../expressError");
+const { NotFoundError } = require("../expressError");
 const { sqlForPartialUpdate } = require("../helpers/sql");
 
 
@@ -31,9 +31,7 @@ class Job {
                     company_handle AS "companyHandle" `,
       [title, salary, equity, company_handle]
     );
-
     const job = result.rows[0];
-    job.equity = Number(job.equity);
 
     return job;
   }
@@ -53,10 +51,6 @@ class Job {
 
     const jobRes = await db.query(sqlQuery,
       values);
-
-    for (const job of jobRes.rows) {
-      job.equity = Number(job.equity);
-    }
 
     return jobRes.rows;
   }
@@ -81,26 +75,105 @@ class Job {
   static sqlForWhereClause(filterParams) {
     const keys = Object.keys(filterParams);
 
-    let whereClause = keys.map((filterParam, idx) => {
+    const whereClause = [];
+    const values = [];
+
+    for (const filterParam of keys) {
       if (filterParam === "title") {
-        filterParams[filterParam] = `%${filterParams[filterParam]}%`;
-        return (`title ILIKE $${idx + 1}`);
+        values.push(`%${filterParams[filterParam]}%`);
+
+        whereClause.push(`title ILIKE $${values.length}`);
       }
       if (filterParam === "minSalary") {
-        return (`salary >= $${idx + 1}`);
+        values.push(filterParams[filterParam]);
+        whereClause.push(`salary >= $${values.length}`);
       }
       if (filterParam === "hasEquity" && filterParams?.hasEquity === true) {
-        return (`equity > 0`);
+        whereClause.push(`equity > 0`);
       }
-    });
+    }
 
     return {
       whereClause: whereClause.length !== 0 ? "WHERE " +
         whereClause.join(" AND ") : "",
-      values: Object.values(filterParams).filter(value =>
-        typeof value !== "boolean"),
+      values: values
     };
   }
+
+
+  /** Given a job id, return data about job.
+  *
+  * Returns { id, title, salary, equity, companyHandle}
+  *
+  * Throws NotFoundError if not found.
+  **/
+
+  static async get(id) {
+    const companyRes = await db.query(`
+          SELECT id,
+                 title,
+                 salary,
+                 equity,
+                 company_handle AS "companyHandle"
+          FROM jobs
+          WHERE id = $1`, [id]);
+
+    const company = companyRes.rows[0];
+
+    if (!company) throw new NotFoundError(`No company: ${id}`);
+
+    return company;
+  }
+
+
+  /** Update job data with `updateData`.
+   *
+   * This is a "partial update" --- it's fine if data doesn't contain all the
+   * fields; this only changes provided ones.
+   *
+   * Data can include: {title, salary, equity}
+   *
+   * Returns {id, title, salary, equity, companyHandle}
+   *
+   * Throws NotFoundError if not found.
+   */
+  static async update(id, updateData) {
+    const { setCols, values } = sqlForPartialUpdate(updateData, {});
+    const idVarIdx = "$" + (values.length + 1);
+
+    const sqlQuery = `
+      UPDATE jobs
+        SET ${setCols}
+        WHERE id = ${idVarIdx}
+        RETURNING
+          id,
+          title,
+          salary,
+          equity,
+          company_handle AS "companyHandle"`;
+
+    const result = await db.query(sqlQuery, [...values, id]);
+    const job = result.rows[0];
+
+    if (!job) throw new NotFoundError(`No such job: id: ${id}`);
+
+    return job;
+  }
+
+
+  static async remove(id) {
+    const result = await db.query(`
+    DELETE
+      FROM jobs
+      WHERE id = $1
+      RETURNING id`, [id]);
+    const job = result.rows[0];
+
+    if (!job) throw new NotFoundError(` No job found: id ${id}`);
+
+    return job;
+  }
+
 
 }
 

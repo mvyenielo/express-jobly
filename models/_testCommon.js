@@ -49,11 +49,9 @@ async function commonBeforeAll() {
                   equity,
                   company_handle AS "companyHandle"
         `);
-  console.log("CREATED JOB ROWS, ", createdJob.rows[0].id);
+
   createdJobId.push(createdJob.rows[0].id);
-  console.log(createdJobId);
 }
-console.log(createdJobId);
 
 async function commonBeforeEach() {
   await db.query("BEGIN");

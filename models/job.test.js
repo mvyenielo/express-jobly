@@ -3,7 +3,7 @@
 
 
 const db = require('../db');
-const { NotFoundError } = require('../expressError');
+const { NotFoundError, BadRequestError } = require('../expressError');
 const Job = require('./job');
 const {
   commonBeforeAll,
@@ -18,7 +18,6 @@ beforeEach(commonBeforeEach);
 afterEach(commonAfterEach);
 afterAll(commonAfterAll);
 
-console.log("CREATED JOB ID, ", createdJobId[0]);
 /************************************** create */
 
 describe("create", function () {
@@ -26,7 +25,7 @@ describe("create", function () {
     const jobData = {
       title: 'newJob',
       salary: 50000,
-      equity: 0.005,
+      equity: "0.005",
       company_handle: 'c1'
     };
     const job = await Job.create(jobData);
@@ -35,7 +34,7 @@ describe("create", function () {
       id: expect.any(Number),
       title: 'newJob',
       salary: 50000,
-      equity: 0.005,
+      equity: "0.005",
       companyHandle: 'c1'
     });
 
@@ -75,7 +74,7 @@ describe("findAll", function () {
         id: expect.any(Number),
         title: 'J2',
         salary: 70000,
-        equity: 0.03,
+        equity: "0.03",
         companyHandle: 'c2'
       },
       {
@@ -97,8 +96,8 @@ describe("findAll", function () {
         id: expect.any(Number),
         title: 'J2',
         salary: 70000,
-        equity: 0.03,
-        company_handle: 'c2'
+        equity: "0.03",
+        companyHandle: 'c2'
       }
     ]);
   });
@@ -112,8 +111,8 @@ describe("findAll", function () {
         id: expect.any(Number),
         title: 'J2',
         salary: 70000,
-        equity: 0.03,
-        company_handle: 'c2'
+        equity: "0.03",
+        companyHandle: 'c2'
       }
     ]);
   });
@@ -128,7 +127,7 @@ describe("findAll", function () {
         title: 'J1',
         salary: 60000,
         equity: null,
-        company_handle: 'c1'
+        companyHandle: 'c1'
       }
     ]);
   });
@@ -178,10 +177,10 @@ describe("get", function () {
 
     expect(job).toEqual({
       id: createdJobId[0],
-      title: 'J1',
+      title: 'createdJob',
       salary: 60000,
       equity: null,
-      company_handle: 'c1'
+      companyHandle: 'c1'
     });
   });
 
@@ -197,7 +196,7 @@ describe("update", function () {
   const updateData = {
     title: 'newTitle',
     salary: 100000,
-    equity: .005
+    equity: "0.005"
   };
 
   test("works with valid data", async function () {
@@ -206,7 +205,7 @@ describe("update", function () {
     expect(job).toEqual({
       id: createdJobId[0],
       ...updateData,
-      company_handle: 'c1'
+      companyHandle: 'c1'
     });
 
     const result = await db.query(`
@@ -232,7 +231,8 @@ describe("update", function () {
 
     expect(job).toEqual({
       id: createdJobId[0],
-      ...updateDataSetNulls
+      ...updateDataSetNulls,
+      companyHandle: 'c1'
     });
 
     const result = await db.query(`
@@ -254,7 +254,7 @@ describe("update", function () {
 
   test("bad request with no data", async function () {
     await expect(async () =>
-      await Job.update(createdJobId[0], {})), rehects.toThrow(NotFoundError);
+      await Job.update(createdJobId[0], {})).rejects.toThrow(BadRequestError);
   });
 });
 
@@ -275,6 +275,6 @@ describe("remove", function () {
 
   test("not found error if no such job", async function () {
     await expect(async () =>
-      await Job.remove(createdJobId[0])).rejects.toThrow(NotFoundError);
+      await Job.remove(0)).rejects.toThrow(NotFoundError);
   });
 });
