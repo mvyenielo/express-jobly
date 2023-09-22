@@ -26,7 +26,7 @@ describe("create", function () {
       title: 'newJob',
       salary: 50000,
       equity: "0.005",
-      company_handle: 'c1'
+      companyHandle: 'c1'
     };
     const job = await Job.create(jobData);
 
